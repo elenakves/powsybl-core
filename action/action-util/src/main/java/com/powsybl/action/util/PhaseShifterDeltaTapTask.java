@@ -25,6 +25,10 @@ public class PhaseShifterDeltaTapTask implements ModificationTask {
         this.tapDelta = tapDelta;
     }
 
+    public int getTapDelta() {
+        return tapDelta;
+    }
+
     @Override
     public void modify(Network network, ComputationManager computationManager) {
         Objects.requireNonNull(network);

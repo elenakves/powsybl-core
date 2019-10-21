@@ -6,6 +6,7 @@
  */
 package com.powsybl.action.dsl;
 
+import com.powsybl.action.util.PhaseShifterDeltaTapTask;
 import com.powsybl.contingency.Contingency;
 import com.powsybl.contingency.ContingencyElement;
 import com.powsybl.iidm.network.Network;
@@ -18,6 +19,8 @@ import org.junit.Test;
 import org.junit.rules.ExpectedException;
 import org.mockito.ArgumentMatcher;
 
+import java.util.Arrays;
+import java.util.List;
 import java.util.function.Function;
 
 import static org.junit.Assert.*;
@@ -89,20 +92,36 @@ public class ActionDslLoaderTest {
         assertFalse(phaseTapChanger.isRegulating());
     }
 
+    private static List<DeltaTapDataTest> provideParams() {
+        return Arrays.asList(
+                new DeltaTapDataTest(1, 1, 0, "deltaTap0"),
+                new DeltaTapDataTest(1, 2, 1, "deltaTap1"),
+                new DeltaTapDataTest(1, 3, 2, "deltaTap2"),
+                new DeltaTapDataTest(1, 3, 3, "deltaTap3"),
+                new DeltaTapDataTest(1, 3, 10, "deltaTap10"),
+                new DeltaTapDataTest(1, 0, -1, "deltaTapMinus1"),
+                new DeltaTapDataTest(1, 0, -2, "deltaTapMinus2"),
+                new DeltaTapDataTest(1, 0, -10, "deltaTapMinus10")
+        );
+    }
+
     @Test
     public void testDeltaTapDslExtension() {
-        ActionDb actionDb = new ActionDslLoader(new GroovyCodeSource(getClass().getResource("/actions2.groovy"))).load(network);
-        Action deltaTapAction = actionDb.getAction("deltaTap");
-        assertNotNull(deltaTapAction);
-        addPhaseShifter(1);
-        PhaseTapChanger phaseTapChanger = network.getTwoWindingsTransformer("NGEN_NHV1").getPhaseTapChanger();
-        assertEquals(1, phaseTapChanger.getTapPosition());
-        assertTrue(phaseTapChanger.isRegulating());
-        assertEquals(PhaseTapChanger.RegulationMode.CURRENT_LIMITER, phaseTapChanger.getRegulationMode());
-        deltaTapAction.run(network, null);
-        assertEquals(3, phaseTapChanger.getTapPosition());
-        assertEquals(PhaseTapChanger.RegulationMode.DELTA_TAP, phaseTapChanger.getRegulationMode());
-        assertFalse(phaseTapChanger.isRegulating());
+        for (DeltaTapDataTest dataTest : provideParams()) {
+            ActionDb actionDb = new ActionDslLoader(new GroovyCodeSource(getClass().getResource("/actions2.groovy"))).load(network);
+            Action deltaTapAction = actionDb.getAction(dataTest.getTestName());
+            assertNotNull(deltaTapAction);
+            assertEquals(dataTest.getDeltaTap(), ((PhaseShifterDeltaTapTask) deltaTapAction.getTasks().get(0)).getTapDelta());
+            addPhaseShifter(dataTest.getIniTapPosition());
+            PhaseTapChanger phaseTapChanger = network.getTwoWindingsTransformer("NGEN_NHV1").getPhaseTapChanger();
+            assertEquals(1, phaseTapChanger.getTapPosition());
+            assertTrue(phaseTapChanger.isRegulating());
+            assertEquals(PhaseTapChanger.RegulationMode.CURRENT_LIMITER, phaseTapChanger.getRegulationMode());
+            deltaTapAction.run(network, null);
+            assertEquals(dataTest.getExpectedTapPosition(), phaseTapChanger.getTapPosition());
+            assertEquals(PhaseTapChanger.RegulationMode.DELTA_TAP, phaseTapChanger.getRegulationMode());
+            assertFalse(phaseTapChanger.isRegulating());
+        }
     }
 
     @Test

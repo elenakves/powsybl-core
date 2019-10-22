@@ -29,9 +29,12 @@ import org.eclipse.rdf4j.model.Statement;
 import org.eclipse.rdf4j.model.util.URIUtil;
 import org.eclipse.rdf4j.model.vocabulary.RDF;
 import org.eclipse.rdf4j.query.BindingSet;
+import org.eclipse.rdf4j.query.QueryLanguage;
 import org.eclipse.rdf4j.query.QueryResults;
 import org.eclipse.rdf4j.query.TupleQuery;
 import org.eclipse.rdf4j.query.TupleQueryResult;
+import org.eclipse.rdf4j.query.Update;
+import org.eclipse.rdf4j.query.UpdateExecutionException;
 import org.eclipse.rdf4j.repository.Repository;
 import org.eclipse.rdf4j.repository.RepositoryConnection;
 import org.eclipse.rdf4j.repository.RepositoryResult;
@@ -51,7 +54,9 @@ import com.powsybl.triplestore.api.AbstractPowsyblTripleStore;
 import com.powsybl.triplestore.api.PrefixNamespace;
 import com.powsybl.triplestore.api.PropertyBag;
 import com.powsybl.triplestore.api.PropertyBags;
+import com.powsybl.triplestore.api.TripleStore;
 import com.powsybl.triplestore.api.TripleStoreException;
+import com.powsybl.triplestore.api.TripleStoreFactoryService;
 
 /**
  * @author Luma Zamarreño <zamarrenolm at aia.es>
@@ -65,6 +70,12 @@ public class TripleStoreRDF4J extends AbstractPowsyblTripleStore {
 
     public Repository getRepository() {
         return repo;
+    }
+
+    @Override
+    public String getImplementationName() {
+        TripleStoreFactoryService ts = new TripleStoreFactoryServiceRDF4J();
+        return ts.getImplementationName();
     }
 
     public void setWriteBySubject(boolean writeBySubject) {
@@ -107,7 +118,7 @@ public class TripleStoreRDF4J extends AbstractPowsyblTripleStore {
             RepositoryResult<Resource> contexts = conn.getContextIDs();
             while (contexts.hasNext()) {
                 Resource context = contexts.next();
-                LOGGER.info("Writing context {}", context);
+                LOG.info("Writing context {}", context);
 
                 RepositoryResult<Statement> statements;
                 statements = conn.getStatements(null, null, null, context);
@@ -180,6 +191,55 @@ public class TripleStoreRDF4J extends AbstractPowsyblTripleStore {
             }
         }
         return results;
+    }
+
+    @Override
+    public void update(String query) {
+        String updateStatement = adjustedQuery(query);
+        try (RepositoryConnection conn = repo.getConnection()) {
+
+            Update updateQuery = conn.prepareUpdate(QueryLanguage.SPARQL, updateStatement);
+            updateQuery.execute();
+        } catch (UpdateExecutionException e) {
+            LOG.debug(e.toString());
+        }
+    }
+
+    @Override
+    public void duplicate(TripleStore origin, String baseName) {
+        Repository repoOrigin = ((TripleStoreRDF4J) origin).getRepository();
+        try (RepositoryConnection connOrigin = repoOrigin.getConnection()) {
+
+            try (RepositoryConnection conn = repo.getConnection()) {
+                cloneNamespaces(connOrigin, conn);
+                // clone statements
+                RepositoryResult<Resource> contexts = connOrigin.getContextIDs();
+                while (contexts.hasNext()) {
+                    Resource context = contexts.next();
+                    RepositoryResult<Statement> statements;
+                    statements = connOrigin.getStatements(null, null, null, context);
+                    // add statements to the new repository
+                    while (statements.hasNext()) {
+                        Statement statement = statements.next();
+                        conn.add(statement);
+                    }
+                }
+            }
+        }
+    }
+
+    private void cloneNamespaces(RepositoryConnection connOrigin, RepositoryConnection conn) {
+        List<PrefixNamespace> namespaces = new ArrayList<>();
+        RepositoryResult<Namespace> ns = connOrigin.getNamespaces();
+        while (ns.hasNext()) {
+            Namespace namespace = ns.next();
+            namespaces.add(new PrefixNamespace(namespace.getPrefix(), namespace.getName()));
+        }
+        for (PrefixNamespace pn : namespaces) {
+            String prefix = pn.getPrefix();
+            String namespace = pn.getNamespace();
+            conn.setNamespace(prefix, namespace);
+        }
     }
 
     @Override
@@ -315,7 +375,5 @@ public class TripleStoreRDF4J extends AbstractPowsyblTripleStore {
 
     private final Repository repo;
     private boolean writeBySubject = true;
-
-    private static final Logger LOGGER = LoggerFactory.getLogger(TripleStoreRDF4J.class);
-
+    private static final Logger LOG = LoggerFactory.getLogger(TripleStoreRDF4J.class);
 }

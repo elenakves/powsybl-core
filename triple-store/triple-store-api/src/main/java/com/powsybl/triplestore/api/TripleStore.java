@@ -57,6 +57,12 @@ public interface TripleStore {
 
     Set<String> contextNames();
 
+    void update(String queryText);
+
+    void duplicate(TripleStore origin, String baseName);
+
+    String getImplementationName();
+
     /**
      * Add a namespace to the triple store
      *

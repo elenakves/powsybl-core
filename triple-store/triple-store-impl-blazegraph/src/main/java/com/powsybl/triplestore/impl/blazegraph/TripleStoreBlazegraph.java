@@ -24,6 +24,7 @@ import org.openrdf.model.Namespace;
 import org.openrdf.model.Resource;
 import org.openrdf.model.Statement;
 import org.openrdf.model.URI;
+import org.openrdf.model.ValueFactory;
 import org.openrdf.model.impl.LinkedHashModel;
 import org.openrdf.model.vocabulary.RDF;
 import org.openrdf.query.BindingSet;
@@ -33,6 +34,8 @@ import org.openrdf.query.QueryLanguage;
 import org.openrdf.query.QueryResults;
 import org.openrdf.query.TupleQuery;
 import org.openrdf.query.TupleQueryResult;
+import org.openrdf.query.Update;
+import org.openrdf.query.UpdateExecutionException;
 import org.openrdf.repository.Repository;
 import org.openrdf.repository.RepositoryConnection;
 import org.openrdf.repository.RepositoryException;
@@ -54,7 +57,9 @@ import com.powsybl.triplestore.api.AbstractPowsyblTripleStore;
 import com.powsybl.triplestore.api.PrefixNamespace;
 import com.powsybl.triplestore.api.PropertyBag;
 import com.powsybl.triplestore.api.PropertyBags;
+import com.powsybl.triplestore.api.TripleStore;
 import com.powsybl.triplestore.api.TripleStoreException;
+import com.powsybl.triplestore.api.TripleStoreFactoryService;
 
 /**
  * @author Luma Zamarreño <zamarrenolm at aia.es>
@@ -79,6 +84,16 @@ public class TripleStoreBlazegraph extends AbstractPowsyblTripleStore {
         } catch (RepositoryException x) {
             LOG.error("Repository could not be created {}", x.getMessage());
         }
+    }
+
+    public Repository getRepository() {
+        return repo;
+    }
+
+    @Override
+    public String getImplementationName() {
+        TripleStoreFactoryService ts = new TripleStoreFactoryServiceBlazegraph();
+        return ts.getImplementationName();
     }
 
     private void closeConnection(RepositoryConnection cnx, String operation) {
@@ -225,6 +240,112 @@ public class TripleStoreBlazegraph extends AbstractPowsyblTripleStore {
             return null;
         } finally {
             closeConnection(cnx, "Querying");
+        }
+    }
+
+    @Override
+    public void update(String query) {
+        RepositoryConnection cnx;
+        String updateStatement = adjustedQuery(query);
+        try {
+            cnx = repo.getConnection();
+            try {
+                Update updateQuery = cnx.prepareUpdate(QueryLanguage.SPARQL, updateStatement);
+                try {
+                    updateQuery.execute();
+                } catch (UpdateExecutionException e) {
+                    throw new TripleStoreException("Update using blazergraph", e);
+                } finally {
+                    closeConnection(cnx);
+                }
+            } catch (MalformedQueryException e) {
+                throw new TripleStoreException(String.format("Query [%s]", query), e);
+            }
+        } catch (RepositoryException e) {
+            throw new TripleStoreException(String.format("Opening repo for update"), e);
+        }
+    }
+
+    @Override
+    public void duplicate(TripleStore origin, String baseName) {
+        Repository repoOrigin = ((TripleStoreBlazegraph) origin).getRepository();
+        RepositoryConnection connOrigin = null;
+        RepositoryConnection conn = null;
+        try {
+            connOrigin = repoOrigin.getConnection();
+            try {
+                conn = repo.getConnection();
+                conn.begin();
+                cloneNamespaces(connOrigin, conn, baseName);
+                replicateStatements(connOrigin, conn);
+                conn.commit();
+            } catch (RepositoryException e) {
+                LOG.error("Cloning from origin to repo : {}", e.getMessage());
+            } finally {
+                closeConnection(conn);
+            }
+        } catch (RepositoryException e) {
+            LOG.error("Connect to the original repo : {}", e.getMessage());
+        } finally {
+            closeConnection(connOrigin);
+        }
+    }
+
+    private void closeConnection(RepositoryConnection conn) {
+        if (conn != null) {
+            try {
+                conn.close();
+            } catch (RepositoryException e) {
+                LOG.error("Closing connection : {}", e.getMessage());
+            }
+        }
+    }
+
+    private void cloneNamespaces(RepositoryConnection connOrigin, RepositoryConnection conn,
+        String baseName) {
+        List<PrefixNamespace> namespaces = new ArrayList<>();
+        RepositoryResult<Namespace> ns;
+        try {
+            connOrigin.setNamespace("data", baseName.concat("#"));
+            ns = connOrigin.getNamespaces();
+            while (ns.hasNext()) {
+                Namespace namespace = ns.next();
+                namespaces.add(new PrefixNamespace(namespace.getPrefix(), namespace.getName()));
+            }
+            for (PrefixNamespace pn : namespaces) {
+                String prefix = pn.getPrefix();
+                String namespace = pn.getNamespace();
+                conn.setNamespace(prefix, namespace);
+            }
+        } catch (RepositoryException e) {
+            LOG.error("Cloning Namespaces : {}", e.getMessage());
+        }
+    }
+
+    private void replicateStatements(RepositoryConnection connOrigin,
+        RepositoryConnection conn) throws RepositoryException {
+        ValueFactory vfac = conn.getValueFactory();
+        RepositoryResult<Resource> contexts = connOrigin.getContextIDs();
+        while (contexts.hasNext()) {
+            Resource context = contexts.next();
+            RepositoryResult<Statement> statements = connOrigin.getStatements(null, null, null, true, context);
+            // we need to get StringValue from each item, to get rid of the original repo
+            // references.
+            while (statements.hasNext()) {
+                Statement st = statements.next();
+                URI sClone = vfac.createURI(st.getSubject().stringValue());
+                URI pClone = vfac.createURI(st.getPredicate().stringValue());
+                Resource contextClone = vfac.createURI(st.getContext().stringValue());
+                if (st.getObject() instanceof URI) {
+                    URI oClone = vfac.createURI(st.getObject().stringValue());
+                    Statement statementClone = vfac.createStatement(sClone, pClone, oClone, contextClone);
+                    conn.add(statementClone);
+                } else {
+                    Literal oClone = vfac.createLiteral(st.getObject().stringValue());
+                    Statement statementClone = vfac.createStatement(sClone, pClone, oClone, contextClone);
+                    conn.add(statementClone);
+                }
+            }
         }
     }
 

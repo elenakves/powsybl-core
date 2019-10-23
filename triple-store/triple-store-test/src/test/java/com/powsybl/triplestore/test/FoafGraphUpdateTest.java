@@ -13,7 +13,7 @@ import com.powsybl.triplestore.test.TripleStoreTester.Expected;
 public class FoafGraphUpdateTest {
 
     private static String base = "foo:foaf";
-    private static String[] inputs = { "foaf/abc-nicks.ttl", "foaf/abc-lastNames.ttl" };
+    private static String[] inputs = {"foaf/abc-nicks.ttl", "foaf/abc-lastNames.ttl" };
 
     @BeforeClass
     public static void setUp() {

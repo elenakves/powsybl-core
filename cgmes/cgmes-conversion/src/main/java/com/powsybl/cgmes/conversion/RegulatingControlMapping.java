@@ -202,11 +202,6 @@ public class RegulatingControlMapping {
         return false;
     }
 
-    private Terminal findRemoteRegulatingTerminal(String cgmesTerminal, String topologicalNode) {
-        return Optional.ofNullable(context.terminalMapping().find(cgmesTerminal))
-                .orElseGet(() -> context.terminalMapping().findFromTopologicalNode(topologicalNode));
-    }
-
     private boolean setRemoteRegulatingTerminal(String tc, RegulatingControl control) {
         if (context.tapChangerTransformers().transformer2(tc) != null) {
             throw new PowsyblException("Unexpeted RemoteRegulatinTerminal for two windings transformer");
@@ -217,7 +212,7 @@ public class RegulatingControlMapping {
     }
 
     private boolean setRemoteRegulatingTerminal(String tc, RegulatingControl control, ThreeWindingsTransformer t3w) {
-        Terminal regTerminal = findRemoteRegulatingTerminal(control.cgmesTerminal, control.topologicalNode);
+        Terminal regTerminal = findRegulatingTerminal(control.cgmesTerminal, control.topologicalNode);
         if (regTerminal == null) {
             context.missing(String.format(MISSING_IIDM_TERMINAL, control.topologicalNode));
             return false;
@@ -258,8 +253,13 @@ public class RegulatingControlMapping {
     }
 
     public Terminal findRegulatingTerminal(String cgmesTerminal, String topologicalNode) {
-        return Optional.ofNullable(context.terminalMapping().find(cgmesTerminal))
-                .orElseGet(() -> context.terminalMapping().findFromTopologicalNode(topologicalNode));
+        return Optional.ofNullable(context.terminalMapping().find(cgmesTerminal)).filter(Terminal::isConnected)
+                .orElseGet(() -> {
+                    context.invalid("Regulating terminal", String.format("No connected IIDM terminal has been found for CGMES terminal %s. " +
+                                    "A connected terminal linked to the topological node %s is searched.",
+                            cgmesTerminal, topologicalNode));
+                    return context.terminalMapping().findFromTopologicalNode(topologicalNode);
+                });
     }
 
     static boolean isControlModeVoltage(String controlMode) {

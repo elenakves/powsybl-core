@@ -13,7 +13,7 @@ import com.powsybl.triplestore.test.TripleStoreTester.Expected;
 public class FoafGraphUpdateTest {
 
     private static String base = "foo:foaf";
-    private static String[] inputs = {"foaf/abc-nicks.ttl", "foaf/abc-lastNames.ttl" };
+    private static String[] inputs = { "foaf/abc-nicks.ttl", "foaf/abc-lastNames.ttl" };
 
     @BeforeClass
     public static void setUp() {
@@ -100,7 +100,6 @@ public class FoafGraphUpdateTest {
         Expected expected1 = new Expected().expect("lastName", "Channing", "Cooper", "Marley");
         tester.testQuery(queries.get("selectLastNameGraphs"), expected1);
     }
-
 
     @Test(expected = TripleStoreException.class)
     public void testMalformedQuery() {

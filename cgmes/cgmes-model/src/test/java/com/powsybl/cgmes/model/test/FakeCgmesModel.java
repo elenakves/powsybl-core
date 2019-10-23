@@ -543,6 +543,25 @@ public final class FakeCgmesModel implements CgmesModel {
     }
 
     @Override
+    public PropertyBags updateCgmes(String context, Map<String, String> cgmesChange, String instanceClassOfIidmChang) {
+        return null;
+    }
+
+    @Override
+    public void clone(CgmesModel cgmes) {
+    }
+
+    @Override
+    public String getCimNamespace() {
+        return null;
+    }
+
+    @Override
+    public String getBaseName() {
+        return null;
+    }
+
+    @Override
     public void setBasename(String baseName) {
         // TODO Review if required by current tests
     }

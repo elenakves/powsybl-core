@@ -29,7 +29,7 @@ public class RegulatingControlMapping {
     private final RegulatingControlMappingForGenerators regulatingControlMappingForGenerators;
     private final RegulatingControlMappingForTransformers regulatingControlMappingForTransformers;
 
-    public RegulatingControlMapping(Context context) {
+    RegulatingControlMapping(Context context) {
         this.context = context;
         regulatingControlMappingForGenerators = new RegulatingControlMappingForGenerators(this);
         regulatingControlMappingForTransformers = new RegulatingControlMappingForTransformers(this);
@@ -229,7 +229,7 @@ public class RegulatingControlMapping {
         return false;
     }
 
-    public void setAllRegulatingControls(Network network) {
+    void setAllRegulatingControls(Network network) {
         setAllRemoteRegulatingTerminals();
 
         regulatingControlMappingForGenerators.applyRegulatingControls(network);
@@ -252,7 +252,7 @@ public class RegulatingControlMapping {
         cachedRegulatingControls.clear();
     }
 
-    public Terminal findRegulatingTerminal(String cgmesTerminal, String topologicalNode) {
+    Terminal findRegulatingTerminal(String cgmesTerminal, String topologicalNode) {
         return Optional.ofNullable(context.terminalMapping().find(cgmesTerminal)).filter(Terminal::isConnected)
                 .orElseGet(() -> {
                     context.invalid("Regulating terminal", String.format("No connected IIDM terminal has been found for CGMES terminal %s. " +

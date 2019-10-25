@@ -88,3 +88,15 @@ action ('deltaTapMinus10') {
         phaseShifterDeltaTap('NGEN_NHV1', -10)
     }
 }
+
+action ('setTargetPFixed5') {
+    tasks {
+        setTargetPFixed('VERN73G1', 5.0)
+    }
+}
+
+action ('setTargetPDelta10') {
+    tasks {
+        setTargetPDelta('VERN73G1', -10.0)
+    }
+}

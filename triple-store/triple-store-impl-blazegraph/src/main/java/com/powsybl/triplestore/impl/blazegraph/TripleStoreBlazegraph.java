@@ -254,15 +254,15 @@ public class TripleStoreBlazegraph extends AbstractPowsyblTripleStore {
                 try {
                     updateQuery.execute();
                 } catch (UpdateExecutionException e) {
-                    throw new TripleStoreException("Update using blazergraph", e);
+                    throw new TripleStoreException("Update using blazergraph" + e.getMessage());
                 } finally {
                     closeConnection(cnx);
                 }
             } catch (MalformedQueryException e) {
-                throw new TripleStoreException(String.format("Query [%s]", query), e);
+                throw new TripleStoreException(String.format("Query [%s]", query));
             }
         } catch (RepositoryException e) {
-            throw new TripleStoreException(String.format("Opening repo for update"), e);
+            throw new TripleStoreException(String.format("Opening repo for update: %s", e.getMessage()));
         }
     }
 

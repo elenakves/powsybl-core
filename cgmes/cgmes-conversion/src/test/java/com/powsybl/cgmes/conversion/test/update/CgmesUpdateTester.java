@@ -38,6 +38,7 @@ import com.powsybl.commons.datasource.ResourceDataSource;
 import com.powsybl.commons.datasource.ResourceSet;
 import com.powsybl.computation.ComputationManager;
 import com.powsybl.iidm.network.Network;
+import com.powsybl.iidm.network.Substation;
 import com.powsybl.loadflow.LoadFlow;
 import com.powsybl.loadflow.LoadFlowParameters;
 import com.powsybl.loadflow.LoadFlowResult;
@@ -83,7 +84,6 @@ public class CgmesUpdateTester {
                 // import new network to compare
                 Network network1 = cgmesImport.importData(tmp, importParameters(impl));
                 runLoadFlow(network1);
-
                 compare(network0, network1);
             }
         }
@@ -91,6 +91,7 @@ public class CgmesUpdateTester {
 
     @Test
     public void updateCgmes16Test() throws IOException {
+    	
 
         for (String impl : TripleStoreFactory.onlyDefaultImplementation()) {
 
@@ -116,7 +117,7 @@ public class CgmesUpdateTester {
         }
     }
 
-    @Test
+    //@Test
     public void updateLoadsGeneratorsTest() throws IOException {
 
         for (String impl : TripleStoreFactory.onlyDefaultImplementation()) {

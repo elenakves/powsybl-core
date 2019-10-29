@@ -22,10 +22,9 @@ public class IidmToCgmes16 extends AbstractIidmToCgmes {
 
     @Override
     protected Multimap<String, CgmesPredicateDetails> switcher() {
-//        LOG.info("IIDM instance is: " + getIidmInstanceName());
         switch (getIidmInstanceName()) {
             case SUBSTATION_IMPL:
-                SubstationToSubstation sb = new SubstationToSubstation(change);
+                SubstationToSubstation sb = new SubstationToSubstation(change, cgmes);
                 mapIidmToCgmesPredicates = sb.mapIidmToCgmesPredicates();
                 break;
             case BUSBREAKER_VOLTAGELEVEL:

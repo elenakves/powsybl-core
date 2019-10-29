@@ -7,7 +7,8 @@ import java.io.IOException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.powsybl.iidm.network.Network;
+import com.powsybl.iidm.network.Country;
+import com.powsybl.iidm.network.*;
 
 public final class UpdateNetworkFromCatalog14 {
     private UpdateNetworkFromCatalog14() {
@@ -17,12 +18,13 @@ public final class UpdateNetworkFromCatalog14 {
         /**
          * Test onCreation
          */
-//        Substation substation = network.newSubstation()
-//            .setCountry(network.getSubstation("_INF______SS").getCountry().get())
-//            .setGeographicalTags("_SGR_01")
-//            .setName("BUS   15_SS")
-//            .setId("_BUS____15_SS")
-//            .add();
+    	Iterable<Substation> s = network.getSubstations();
+        Substation substation = network.newSubstation()
+            .setCountry(network.getSubstation("_BUS___10_SS").getCountry().orElse(Country.PT))
+            .setGeographicalTags("_SPT_02")
+            .setName("BUS   15_SS")
+            .setId("_BUS____15_SS")
+            .add();
 //        VoltageLevel voltageLevel = substation.newVoltageLevel()
 //            .setTopologyKind(TopologyKind.BUS_BREAKER)
 //            .setId("_BUS____15_VL")

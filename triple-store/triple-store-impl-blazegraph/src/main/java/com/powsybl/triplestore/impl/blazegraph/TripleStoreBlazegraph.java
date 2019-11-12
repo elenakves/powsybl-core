@@ -267,7 +267,7 @@ public class TripleStoreBlazegraph extends AbstractPowsyblTripleStore {
     }
 
     @Override
-    public void clone(TripleStore origin, String baseName) {
+    public void copyFrom(TripleStore origin, String baseName) {
         Repository repoOrigin = ((TripleStoreBlazegraph) origin).getRepository();
         RepositoryConnection connOrigin = null;
         RepositoryConnection conn = null;

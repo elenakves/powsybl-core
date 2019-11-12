@@ -18,7 +18,7 @@ public class TriplestoreCloneTest {
         tester.testPerformanceCloneByStatements();
     }
 
-    @Test
+    //@Test
     public void testUpdateClone() {
         String base = "foo:foaf";
         String[] inputs = {"foaf/abc-nicks.ttl", "foaf/abc-lastNames.ttl" };
@@ -44,7 +44,7 @@ public class TriplestoreCloneTest {
             "cgmes-national-grid/20190312T2330Z_1D_NG_TP_001.xml",
             "cgmes-national-grid/20190312T2330Z_NG_EQ_001.xml" };
         tester = new TripleStoreTester(
-            TripleStoreFactory.allImplementations(), base, inputs);
+            TripleStoreFactory.onlyDefaultImplementation(), base, inputs);
         tester.load();
         tester.testPerformanceCloneByStatements();
     }

@@ -502,8 +502,8 @@ public class CgmesModelTripleStore extends AbstractCgmesModel {
     }
 
     @Override
-    public void clone(CgmesModel cgmes) {
-        tripleStore.clone(cgmes.tripleStore(), cgmes.getBaseName());
+    public void copyFrom(CgmesModel cgmes) {
+        tripleStore.copyFrom(cgmes.tripleStore(), cgmes.getBaseName());
     }
 
     @Override

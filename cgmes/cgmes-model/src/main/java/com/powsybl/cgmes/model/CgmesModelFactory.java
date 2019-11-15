@@ -57,7 +57,7 @@ public final class CgmesModelFactory {
         TripleStore tripleStore = TripleStoreFactory.create(implementation);
         CgmesModel cgmesClone = new CgmesModelTripleStore(cimNamespace, tripleStore);
         cgmesClone.setBasename(cgmes.getBaseName());
-        cgmesClone.clone(cgmes);
+        cgmesClone.copyFrom(cgmes);
         loadCaches(cgmesClone);
         return cgmesClone;
     }

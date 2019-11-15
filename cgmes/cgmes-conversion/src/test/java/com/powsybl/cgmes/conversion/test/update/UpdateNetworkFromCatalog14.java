@@ -20,8 +20,9 @@ public final class UpdateNetworkFromCatalog14 {
          */
     	Iterable<Substation> s = network.getSubstations();
         Substation substation = network.newSubstation()
-            .setCountry(network.getSubstation("_BUS___10_SS").getCountry().orElse(Country.PT))
-            .setGeographicalTags("_SPT_02")
+//            .setCountry(network.getSubstation("_BUS___10_SS").getCountry().orElse(Country.PT))
+            .setCountry(Country.NO)
+            .setGeographicalTags("_SNO_01")
             .setName("BUS   15_SS")
             .setId("_BUS____15_SS")
             .add();
@@ -154,7 +155,7 @@ public final class UpdateNetworkFromCatalog14 {
 //            .setR(3.0).setX(4.0).setRatedU1(11.1).setRatedU2(22.2);
 //        network.getTwoWindingsTransformer("_BUS____4-BUS____7-1_PT").getRatioTapChanger()
 //            .setTapPosition(7);// ?? --> not in change
-        network.getGenerator("_GEN____3_SM").setRatedS(100).setMaxP(200.0).setMinP(-200.0);
+        ////////network.getGenerator("_GEN____3_SM").setRatedS(100).setMaxP(200.0).setMinP(-200.0);
         // .setTargetP(1.0);
 //        network.getGenerator("_GEN____2_SM").setTargetP(11.1);// ??setTargetP --> not in change
 //        network.getSubstation("_BUS____4_SS").setCountry(Country.GR);

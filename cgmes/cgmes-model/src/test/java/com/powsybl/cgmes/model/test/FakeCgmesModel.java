@@ -551,7 +551,7 @@ public final class FakeCgmesModel implements CgmesModel {
     }
 
     @Override
-    public void clone(CgmesModel cgmes) {
+    public void copyFrom(CgmesModel cgmes) {
     }
 
     @Override

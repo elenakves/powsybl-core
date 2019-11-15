@@ -126,7 +126,7 @@ public interface CgmesModel {
 
     PropertyBags dcTerminalsTP();
 
-    public void clone(CgmesModel cgmes);
+    public void copyFrom(CgmesModel cgmes);
 
     PropertyBags updateCgmes(String queryName, String context, String baseName, Map<String, String> cgmesChanges);
 

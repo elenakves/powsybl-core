@@ -59,7 +59,7 @@ public interface TripleStore {
 
     void update(String queryText);
 
-    void clone(TripleStore origin, String baseName);
+    void copyFrom(TripleStore origin, String baseName);
 
     String getImplementationName();
 

@@ -22,14 +22,14 @@ public final class UpdateNetworkFromCatalog16 {
 		 * Test onCreation
 		 */
 		try {
-			Substation substation = network.newSubstation()
-					.setCountry(network.getSubstation("_047c929a-c766-11e1-8775-005056c00008")
-					.getCountry()
-					.orElse(Country.ES))
-					.setGeographicalTags("_0472a781-c766-11e1-8775-005056c00008")
-					.setName("BUS 16_SS")
-					.setId("_BUS____16_SS")
-					.add();
+//			Substation substation = network.newSubstation()
+//					.setCountry(network.getSubstation("_047c929a-c766-11e1-8775-005056c00008")
+//					.getCountry()
+//					.orElse(Country.ES))
+//					.setGeographicalTags("_0472a781-c766-11e1-8775-005056c00008")
+//					.setName("BUS 16_SS")
+//					.setId("_BUS____16_SS")
+//					.add();
 			// VoltageLevel voltageLevel = substation.newVoltageLevel()
 			// .setTopologyKind(TopologyKind.BUS_BREAKER)
 			// .setId("_BUS____15_VL")

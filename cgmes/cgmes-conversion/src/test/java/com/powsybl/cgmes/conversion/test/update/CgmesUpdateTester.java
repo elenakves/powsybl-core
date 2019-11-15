@@ -117,7 +117,7 @@ public class CgmesUpdateTester {
         }
     }
 
-    //@Test
+    @Test
     public void updateLoadsGeneratorsTest() throws IOException {
 
         for (String impl : TripleStoreFactory.onlyDefaultImplementation()) {

@@ -28,7 +28,7 @@ public class SubstationToSubstation implements ConversionMapper {
 
         final Multimap<String, CgmesPredicateDetails> map = ArrayListMultimap.create();
 
-        map.put("rdfType", new CgmesPredicateDetails("rdf:type", "_EQ", false, "cim:Substation"));
+        map.put("rdfType", new CgmesPredicateDetails("rdf:type", "_EQ", true, "cim:Substation"));
 
         String name = newSubstation.getName();
         if (name != null) {
@@ -43,7 +43,7 @@ public class SubstationToSubstation implements ConversionMapper {
              */
             String regionId = getRegion(country).get(REGION_ID);
             map.put("rdfTypeRegion",
-                new CgmesPredicateDetails("rdf:type", "_EQ", false, "cim:GeographicalRegion", regionId));
+                new CgmesPredicateDetails("rdf:type", "_EQ", true, "cim:GeographicalRegion", regionId));
 
             map.put("nameRegion",
                 new CgmesPredicateDetails("cim:IdentifiedObject.name", "_EQ", false, country, regionId));
@@ -53,7 +53,7 @@ public class SubstationToSubstation implements ConversionMapper {
             String subRegionId = getRegion(country).get(SUBREGION_ID);        
            
             map.put("rdfTypeSubRegion",
-                new CgmesPredicateDetails("rdf:type", "_EQ", false, "cim:SubGeographicalRegion", subRegionId));
+                new CgmesPredicateDetails("rdf:type", "_EQ", true, "cim:SubGeographicalRegion", subRegionId));
 
             map.put(SUBREGION_NAME, new CgmesPredicateDetails("cim:IdentifiedObject.name", "_EQ", false,
                 getRegion(country).get(SUBREGION_NAME), subRegionId));
@@ -69,7 +69,7 @@ public class SubstationToSubstation implements ConversionMapper {
              */
             String subRegionId = getRegion(country).get(SUBREGION_ID);
             map.put("rdfTypeSubRegion",
-                new CgmesPredicateDetails("rdf:type", "_EQ", false, "cim:SubGeographicalRegion", subRegionId));
+                new CgmesPredicateDetails("rdf:type", "_EQ", true, "cim:SubGeographicalRegion", subRegionId));
 
             map.put(SUBREGION_NAME, new CgmesPredicateDetails("cim:IdentifiedObject.name", "_EQ", false,
                 getRegion(country).get(SUBREGION_NAME), subRegionId));

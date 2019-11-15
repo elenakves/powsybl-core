@@ -442,17 +442,24 @@ public class CgmesModelTripleStore extends AbstractCgmesModel {
         String subject = cgmesChanges.get("cgmesSubject");
         String predicate = cgmesChanges.get("cgmesPredicate");
         String value = cgmesChanges.get("cgmesNewValue");
-        String valueIsNode = cgmesChanges.get("valueIsNode");
+        String valueIsUri = cgmesChanges.get("valueIsNode");
 
-        LOG.info("\n*****{},{}, {}, {}, {}******", context, setBaseUri(baseName), subject, predicate, value);
 
-        namedQueryUpdate(queryName, context, subject, predicate, value, setBaseUri(baseName),
-            cimNamespace, valueIsNode);
-
-        return namedQuery("checkCgmesUpdated", context, subject);
+        String baseUri = getBaseUri(baseName);
+        String valueIn = valueIsUri.equals("true") ? baseUri.concat(value) : value;
+        if (value.contains("cim:")) {
+            valueIn = cimNamespace.concat(value.substring(4));
+        }
+       
+        LOG.info("\n*****{},{}, {}, {}, {}******", context, baseUri.concat(subject), predicate, valueIn, valueIsUri);
+        
+        namedQueryUpdate(queryName, context, baseUri.concat(subject), predicate, valueIn, valueIsUri);
+        
+        LOG.info(namedQuery("checkCgmesUpdated", context, baseUri.concat(subject), predicate, valueIn).tabulate());
+        return null;
     }
 
-    private String setBaseUri(String baseName) {
+    private String getBaseUri(String baseName) {
         if (tripleStore.getImplementationName().equals("rdf4j")) {
             return baseName + "/#";
         } else {

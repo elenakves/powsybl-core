@@ -26,7 +26,7 @@ public class GeneratorToSynchronousMachine implements ConversionMapper {
         final Multimap<String, CgmesPredicateDetails> map = ArrayListMultimap.create();
         Generator newGenerator = (Generator) change.getIdentifiable();
 
-        map.put("rdfType", new CgmesPredicateDetails("rdf:type", "_EQ", false, "cim:SynchronousMachine"));
+        map.put("rdfType", new CgmesPredicateDetails("rdf:type", "_EQ", true, "cim:SynchronousMachine"));
 
         String name = newGenerator.getName();
         if (name != null) {
@@ -48,7 +48,7 @@ public class GeneratorToSynchronousMachine implements ConversionMapper {
         /**
          * Create GeneratingUnit element
          */
-        map.put("rdfTypeGU", new CgmesPredicateDetails("rdf:type", "_EQ", false, "cim:GeneratingUnit",
+        map.put("rdfTypeGU", new CgmesPredicateDetails("rdf:type", "_EQ", true, "cim:GeneratingUnit",
             generatingUnitId));
 
         if (name != null) {
